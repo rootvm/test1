@@ -2,7 +2,6 @@
 # FIRST STEP - BUILDING PHP EXTENSIONS        #
 # =========================================== #
 
-FROM php:7.1-fpm-alpine
 FROM php:7.1-fpm-alpine AS build-env
 
 # PREPARE
