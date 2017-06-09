@@ -122,7 +122,7 @@ RUN docker-php-ext-enable \
 FROM php:7.1-fpm-alpine
 RUN apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing gnu-libiconv
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
-OPY --from=build-env /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=build-env /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --from=build-env /usr/local/etc/php/conf.d/* /artifacts/usr/local/etc/php/conf.d/
 RUN find /usr/local/lib/php/extensions/ -name *.so | xargs -I@ sh -c 'ln -s @ /usr/local/lib/php/extensions/`basename @`'
 
