@@ -72,12 +72,6 @@ RUN pecl install \
 	msgpack \
 	igbinary
 
-RUN docker-php-ext-enable \
-	amqp \
-	apcu \
-	geoip \
-	msgpack \
-	igbinary
 
 # ================= #
 # CUSTOM EXTENSIONS #
