@@ -35,7 +35,81 @@ RUN apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main
 # =================== #
 # PHP CORE EXTENSIONS #
 # =================== #
+RUN docker-php-ext-configure \
+    gd --with-freetype-dir=/usr/lib --with-jpeg-dir=/usr/lib --with-png-dir=/usr/lib
 
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) \
+    mcrypt \
+    mysqli \
+    bz2 \
+    opcache \
+    calendar \
+    gd \
+    pcntl \
+    xsl \
+    soap \
+    shmop \
+    sysvmsg \
+    sysvsem \
+    sysvshm \
+    sockets \
+    pdo_mysql \
+    wddx
+
+RUN docker-php-ext-enable opcache
+
+# =============== #
+# PECL EXTENSIONS #
+# =============== #
+
+RUN pecl channel-update pecl.php.net
+
+RUN pecl install \
+	amqp \
+	apcu \
+	geoip-beta \
+	msgpack \
+	igbinary
+RUN docker-php-ext-enable \
+	amqp \
+	apcu \
+	geoip \
+	msgpack \
+	igbinary
+
+# ================= #
+# CUSTOM EXTENSIONS #
+# ================= #
+
+RUN git clone --branch php7 --single-branch --depth 1 https://github.com/php-memcached-dev/php-memcached
+RUN cd php-memcached && phpize && ./configure --enable-memcached-igbinary && make -j$(getconf _NPROCESSORS_ONLN) && make install
+
+# blitz
+RUN git clone --branch php7 --single-branch --depth 1 https://github.com/alexeyrybak/blitz.git blitz
+RUN cd blitz && phpize && ./configure && make -j$(getconf _NPROCESSORS_ONLN) && make install
+
+# handlersocketi
+RUN git clone --branch badoo-7.0 --single-branch --depth 1 https://github.com/tony2001/php-ext-handlersocketi.git handlersocketi
+RUN cd handlersocketi && phpize && ./configure  && make -j$(getconf _NPROCESSORS_ONLN)  && make install
+
+# pinba
+RUN git clone --branch master --single-branch --depth 1 https://github.com/tony2001/pinba_extension.git pinba
+RUN cd pinba && phpize && ./configure && make -j$(getconf _NPROCESSORS_ONLN) && make install
+
+# protobuf
+RUN git clone --branch php7 --single-branch --depth 1 https://github.com/serggp/php-protobuf protobuf
+RUN cd protobuf && phpize && ./configure && make -j$(getconf _NPROCESSORS_ONLN) && make install
+
+# xdebug
+run git clone --single-branch --depth 1 https://github.com/xdebug/xdebug
+RUN cd xdebug && phpize && ./configure --enable-xdebug && make && make INSTALL_ROOT=/build-dev install
+
+RUN docker-php-ext-enable \
+	blitz \
+	handlersocketi \
+	pinba \
+	protobuf \
+	memcached
 
 
 
@@ -44,10 +118,10 @@ RUN apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main
 # =========================================== #
 
 FROM php:7.1-fpm-alpine
+RUN apk add --no-cache libmcrypt libbz2 libpng libxslt gettext openssl geoip libmemcached cyrus-sasl freetype libjpeg-turbo python && \
+	apk add rabbitmq-c --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main
 RUN apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing gnu-libiconv
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 COPY --from=build-env /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --from=build-env /usr/local/etc/php/conf.d/* /artifacts/usr/local/etc/php/conf.d/
 RUN find /usr/local/lib/php/extensions/ -name *.so | xargs -I@ sh -c 'ln -s @ /usr/local/lib/php/extensions/`basename @`'
-
-ADD root /
