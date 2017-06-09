@@ -1,5 +1,5 @@
 #!groovy
-@Library('rootvm') _
+@Library('DdockerBuildTagPush') _
 pipeline {
 agent { label 'master' }
     stages {
