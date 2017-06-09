@@ -100,12 +100,6 @@ RUN cd protobuf && phpize && ./configure && make -j$(getconf _NPROCESSORS_ONLN) 
 run git clone --single-branch --depth 1 https://github.com/xdebug/xdebug
 RUN cd xdebug && phpize && ./configure --enable-xdebug && make && make INSTALL_ROOT=/build-dev install
 
-RUN docker-php-ext-enable \
-	blitz \
-	handlersocketi \
-	pinba \
-	protobuf \
-	memcached
 
 
 
