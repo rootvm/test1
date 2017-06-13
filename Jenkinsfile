@@ -8,4 +8,7 @@ agent { label 'master' }
             }
         }
     }
+	post {
+		success { build job: 'test2/master', wait: false}
+}
 }
